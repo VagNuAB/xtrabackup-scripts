@@ -97,14 +97,16 @@ class BackupTool:
                          self.stop_watch.stop_timer(),
                          self.stop_watch.duration_in_seconds())
 
-    def exec_full_backup(self, user, password, thread_count):
+    def exec_full_backup(self, user, password, thread_count, host, datadir):
         self.stop_watch.start_timer()
         try:
             self.command_executor.exec_filesystem_backup(
                 user,
                 password,
                 thread_count,
-                self.workdir)
+                self.workdir,
+                host,
+                datadir)
         except ProcessError:
             self.logger.error(
                 'An error occured during the backup process.',
@@ -214,12 +216,12 @@ class BackupTool:
             raise
 
     def start_full_backup(self, repository, workdir, user,
-                          password, threads, webhook):
+                          password, threads, webhook, host, datadir):
         self.check_prerequisites(repository)
         self.prepare_workdir(workdir)
         self.prepare_repository(repository, False)
         self.prepare_archive_name(False, False)
-        self.exec_full_backup(user, password, threads)
+        self.exec_full_backup(user, password, threads, host, datadir)
         self.prepare_backup(False)
         self.archive_backup()
         self.transfer_backup(repository)

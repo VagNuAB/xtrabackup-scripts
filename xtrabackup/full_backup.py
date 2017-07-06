@@ -19,6 +19,10 @@ Options:
     MySQL password.
     --tmp-dir=<tmp>             \
     Temporary directory [default: /tmp].
+    --data-dir=<datadir>        \
+    MySQL data directory.
+    --host=<host>               \
+    MySQL host.
     --log-file=<log>            \
     Log file [default: /var/log/mysql/pyxtrabackup.log].
     --out-file=<log>            \
@@ -49,7 +53,9 @@ def main():
                                       arguments['--user'],
                                       arguments['--password'],
                                       arguments['--backup-threads'],
-                                      arguments['--webhook'])
+                                      arguments['--webhook'],
+                                      arguments['--host'],
+                                      arguments['--data-dir'])
     except Exception:
         logger = logging.getLogger(__name__)
         logger.error("pyxtrabackup failed.", exc_info=arguments['--debug'])

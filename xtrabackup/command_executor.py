@@ -16,16 +16,21 @@ class CommandExecutor:
                 raise ProcessError(command, process.returncode)
 
     def exec_filesystem_backup(self, user, password,
-                               threads, backup_directory):
+                               threads, backup_directory, host, datadir):
         command = [
-            'innobackupex',
+            'xtrabackup',
+            '--backup',
             '--user=' + user,
             '--parallel=' + threads,
-            '--no-lock',
-            '--no-timestamp',
-            backup_directory]
+            # '--no-lock',
+            # '--no-timestamp',
+            '--target-dir=' + backup_directory]
         if password:
             command.append('--password=' + password)
+        if host:
+            command.append('--host=' + host)
+        if datadir:
+            command.append('--datadir=' + datadir)
         self.exec_command(command)
 
     def exec_incremental_backup(self, user, password,
