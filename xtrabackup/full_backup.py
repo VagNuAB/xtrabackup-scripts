@@ -20,7 +20,7 @@ Options:
     --tmp-dir=<tmp>             \
     Temporary directory [default: /tmp].
     --data-dir=<datadir>        \
-    MySQL data directory.
+    MySQL server data directory [default: /var/lib/mysql]
     --host=<host>               \
     MySQL host.
     --log-file=<log>            \

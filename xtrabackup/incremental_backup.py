@@ -21,6 +21,10 @@ Options:
     Start an incremental cycle.
     --tmp-dir=<tmp>             \
     Temporary directory [default: /tmp].
+    --data-dir=<datadir>        \
+    MySQL server data directory [default: /var/lib/mysql]
+    --host=<host>               \
+    MySQL host.
     --log-file=<log>            \
     Log file [default: /var/log/mysql/pyxtrabackup.log].
     --out-file=<log>            \
@@ -50,7 +54,9 @@ def main():
             arguments['--tmp-dir'],
             arguments['--user'],
             arguments['--password'],
-            arguments['--backup-threads'])
+            arguments['--backup-threads'],
+            arguments['--host'],
+            arguments['--data-dir'])
     except Exception:
         logger = logging.getLogger(__name__)
         logger.error("pyxtrabackup failed.", exc_info=arguments['--debug'])

@@ -6,7 +6,9 @@ Usage:
 --user=<user> \
 [--password=<pwd>] \
 [--data-dir=<data_dir>] \
+[--skip-stop] \
 [--restart] \
+[--skip-permissions] \
 [--tmp-dir=<tmp>] \
 [--log-file=<log>] \
 [--out-file=<log>] \
@@ -31,8 +33,12 @@ Options:
     Incremental archive target.
     --data-dir=<data_dir>                       \
     MySQL server data directory [default: /var/lib/mysql]
+    --skip-stop                                 \
+    Do not stop MySQL server before backup restoration.
     --restart                                   \
-    Restart the server after backup restoration.
+    Restart the MySQL server after backup restoration.
+    --skip-permissions                          \
+    Do not set file permissions after restoration.
     --tmp-dir=<tmp>                             \
     Temporary directory [default: /tmp].
     --log-file=<log>                            \
@@ -62,7 +68,9 @@ def main():
         restore_tool.start_restoration(arguments['--base-archive'],
                                        arguments['--incremental-archive'],
                                        arguments['--tmp-dir'],
-                                       arguments['--restart'])
+                                       arguments['--restart'],
+                                       arguments['--skip-stop'],
+                                       arguments['--skip-permissions'])
     except Exception:
         logger = logging.getLogger(__name__)
         logger.error("pyxtrabackup failed.", exc_info=True)

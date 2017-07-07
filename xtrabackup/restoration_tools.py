@@ -140,14 +140,16 @@ class RestorationTool:
         filesystem_utils.delete_directory_if_exists(self.workdir)
 
     def start_restoration(self, base_archive, incremental_archive,
-                          workdir, restart_service):
+                          workdir, restart_service, skip_stop, skip_permissions):
         self.prepare_workdir(workdir)
-        self.stop_service()
+        if not skip_stop:
+            self.stop_service()
         self.clean_data_dir()
         self.restore_base_backup(base_archive)
         self.restore_incremental_backups(incremental_archive)
         self.prepare_data_dir()
-        self.set_data_dir_permissions()
+        if not skip_permissions:
+            self.set_data_dir_permissions()
         self.clean()
         if restart_service:
             self.start_service()

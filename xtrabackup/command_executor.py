@@ -19,6 +19,7 @@ class CommandExecutor:
                                threads, backup_directory, host, datadir):
         command = [
             'xtrabackup',
+            # '--defaults-file=' + datadir + '/my.ini',
             '--backup',
             '--user=' + user,
             '--parallel=' + threads,
@@ -34,38 +35,44 @@ class CommandExecutor:
         self.exec_command(command)
 
     def exec_incremental_backup(self, user, password,
-                                threads, lsn, backup_directory):
+                                threads, lsn, backup_directory, host, datadir):
         command = [
-            'innobackupex',
+            'xtrabackup',
+            '--backup',
             '--user=' + user,
             '--parallel=' + threads,
             '--incremental',
             '--incremental-lsn=' + lsn,
-            '--no-lock',
-            '--no-timestamp',
+            # '--no-lock',
+            # '--no-timestamp',
             '--incremental-force-scan',
-            backup_directory]
+            '--target-dir=' + backup_directory]
         if password:
             command.append('--password=' + password)
+        if host:
+            command.append('--host=' + host)
+        if datadir:
+            command.append('--datadir=' + datadir)
         self.exec_command(command)
 
     def exec_backup_preparation(self, backup_directory, redo_logs):
         command = [
-            'innobackupex',
-            '--apply-log',
-            backup_directory]
-        if redo_logs:
-            command.append('--redo-only')
+            'xtrabackup',
+            '--prepare',
+            '--apply-log-only',
+            '--target-dir=' + backup_directory]
+        # if redo_logs:
+        #     command.append('--redo-only')
         self.exec_command(command)
 
     def exec_incremental_preparation(self, backup_directory,
                                      incremental_directory):
         command = [
-            'innobackupex',
-            '--apply-log',
-            '--redo-only',
+            'xtrabackup',
+            '--prepare',
+            '--apply-log-only',
             '--incremental-dir=' + incremental_directory,
-            backup_directory]
+            '--target-dir=' + backup_directory]
         self.exec_command(command)
 
     def exec_manage_service(self, service_name, action):

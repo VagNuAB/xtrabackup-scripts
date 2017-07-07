@@ -32,7 +32,7 @@ class BackupTool:
 
     def check_prerequisites(self, repository):
         try:
-            filesystem_utils.check_required_binaries(['innobackupex', 'tar'])
+            filesystem_utils.check_required_binaries(['xtrabackup', 'tar'])
             filesystem_utils.check_path_existence(repository)
         except exception.ProgramError as error:
             self.logger.error('Prerequisites check failed. %s', str(error),
@@ -78,7 +78,7 @@ class BackupTool:
         self.final_archive_path = filesystem_utils.prepare_archive_path(
             self.backup_repository, backup_prefix, self.compress)
 
-    def exec_incremental_backup(self, user, password, thread_count):
+    def exec_incremental_backup(self, user, password, thread_count, host, datadir):
         self.stop_watch.start_timer()
         try:
             self.command_executor.exec_incremental_backup(
@@ -86,7 +86,9 @@ class BackupTool:
                 password,
                 thread_count,
                 self.last_lsn,
-                self.workdir)
+                self.workdir,
+                host,
+                datadir)
         except ProcessError:
             self.logger.error(
                 'An error occured during the incremental backup process.',
@@ -230,17 +232,17 @@ class BackupTool:
             self.trigger_webhook(webhook)
 
     def start_incremental_backup(self, repository, incremental,
-                                 workdir, user, password, threads):
+                                 workdir, user, password, threads, host, datadir):
         self.check_prerequisites(repository)
         self.prepare_workdir(workdir)
         self.prepare_repository(repository, True)
         if incremental:
             self.load_incremental_data()
             self.prepare_archive_name(incremental, True)
-            self.exec_incremental_backup(user, password, threads)
+            self.exec_incremental_backup(user, password, threads, host, datadir)
         else:
             self.prepare_archive_name(incremental, True)
-            self.exec_full_backup(user, password, threads)
+            self.exec_full_backup(user, password, threads, host, datadir)
         self.save_incremental_data(incremental)
         self.archive_backup()
         self.transfer_backup(repository)
