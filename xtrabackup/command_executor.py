@@ -15,6 +15,12 @@ class CommandExecutor:
             if process.returncode != 0:
                 raise ProcessError(command, process.returncode)
 
+    def run_bash(self, command):
+        with open(self.output_file_path, 'a+') as error_file:
+            process = subprocess.run(['bash', '-c', command], stdout=error_file, stderr=subprocess.STDOUT)
+            if process.returncode != 0:
+                raise ProcessError(command, process.returncode)
+
     def exec_filesystem_backup(self, user, password,
                                threads, backup_directory, host, datadir):
         command = [
@@ -83,18 +89,27 @@ class CommandExecutor:
         command = ['/bin/chown', '-R', user + ':' + group, directory_path]
         self.exec_command(command)
 
-    def create_archive(self, directory, archive_path, compress):
-        if compress:
-            tar_options = 'cpvzf'
-        else:
-            tar_options = 'cpvf'
-        command = [
-            'tar',
-            tar_options,
-            archive_path,
-            '-C',
-            directory, '.']
-        self.exec_command(command)
+    def create_archive(self, directory, archive_path, compress, compression_tool, encryption_key):
+        if compression_tool == 'gz':
+            if compress:
+                tar_options = 'cpvzf'
+            else:
+                tar_options = 'cpvf'
+
+            command = [
+                'tar',
+                tar_options,
+                archive_path,
+                '-C',
+                directory, '.']
+            self.exec_command(command)
+        elif compression_tool == '7z':
+            command = 'tar cpvf - -C %s . | 7z a -si %s -mhe -mx=9' % (directory, archive_path)
+
+            if encryption_key:
+                command += ' -p%s' % (encryption_key)
+            
+            self.run_bash(command)
 
     def extract_archive(self, archive_path, destination_path, compressed):
         if compressed:

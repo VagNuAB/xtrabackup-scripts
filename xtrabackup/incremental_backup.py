@@ -33,6 +33,10 @@ Options:
     Threads count [default: 1].
     --no-compress               \
     Do not create a compressed archive of the backup.
+    --compress-with=(gz | 7z)   \
+    Which compression tool to use [default: gz].
+    --encryption-key=[key]      \
+    Encrypt backup with this key [default: ].
 
 """
 from docopt import docopt
@@ -46,7 +50,8 @@ def main():
     try:
         backup_tool = BackupTool(
             arguments['--log-file'], arguments['--out-file'],
-            arguments['--no-compress'], arguments['--debug'])
+            arguments['--no-compress'], arguments['--compress-with'],
+            arguments['--encryption-key'], arguments['--debug'])
 
         backup_tool.start_incremental_backup(
             arguments['<repository>'],

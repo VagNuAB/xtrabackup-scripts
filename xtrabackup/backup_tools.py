@@ -10,7 +10,7 @@ import logging
 
 class BackupTool:
 
-    def __init__(self, log_file, output_file, no_compression, debug=False):
+    def __init__(self, log_file, output_file, no_compression, compression_tool, encryption_key, debug=False):
         self.debug = debug
         self.log_manager = log_manager.LogManager()
         self.stop_watch = timer.Timer()
@@ -24,6 +24,8 @@ class BackupTool:
             raise
         self.command_executor = CommandExecutor(output_file)
         self.compress = not no_compression
+        self.compression_tool = compression_tool
+        self.encryption_key = encryption_key
         self.http = HttpManager()
 
     def setup_logging(self, log_file):
@@ -48,8 +50,10 @@ class BackupTool:
             raise
         self.workdir = path + '/xtrabackup_tmp'
         self.logger.debug("Temporary workdir: " + self.workdir)
-        if self.compress:
+        if self.compress and self.compression_tool == 'gz':
             self.archive_path = path + '/backup.tar.gz'
+        elif self.compress and self.compression_tool == '7z':
+            self.archive_path = path + '/backup.tar.7z'
         else:
             self.archive_path = path + '/backup.tar'
         self.logger.debug("Temporary archive: " + self.archive_path)
@@ -76,7 +80,7 @@ class BackupTool:
             else:
                 backup_prefix = ''
         self.final_archive_path = filesystem_utils.prepare_archive_path(
-            self.backup_repository, backup_prefix, self.compress)
+            self.backup_repository, backup_prefix, self.compress, self.compression_tool)
 
     def exec_incremental_backup(self, user, password, thread_count, host, datadir):
         self.stop_watch.start_timer()
@@ -138,7 +142,7 @@ class BackupTool:
         self.stop_watch.start_timer()
         try:
             self.command_executor.create_archive(
-                self.workdir, self.archive_path, self.compress)
+                self.workdir, self.archive_path, self.compress, self.compression_tool, self.encryption_key)
         except ProcessError:
             self.logger.error(
                 'An error occured during the archiving of the backup.',
